@@ -1,2 +1,2 @@
-# LoSuch
-Sistema de Busca Open Source
+## LoSuch
+Sistema de Busca Open Source [EM DESENVOLVIMENTO]
