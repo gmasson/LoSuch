@@ -1,2 +1,2 @@
 ## LoSuch
-Sistema de Busca Open Source [EM DESENVOLVIMENTO]
+Sistema de Busca PHP com PDO Open Source
