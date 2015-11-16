@@ -44,7 +44,7 @@
       $resultado_titulo = $resultado_busca['titulo'];
       $resultado_post = $resultado_busca['post'];
 
-      // Se a quantidade de caracteres for maior que 42, reduza e insira '...' no final do link
+      // Se a quantidade de caracteres for maior que 42, reduza e insira '...' no final
       if (strlen($resultado_post) >= 42) { $resultado_post = substr($resultado_post, 0, 51)."..."; }
 
       // Exibição dos resultados da pesquisa
