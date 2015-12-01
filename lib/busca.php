@@ -1,11 +1,26 @@
 <?php
 
+function paginaAtual() {
+    return (int) $_GET['p'] ?: 1;
+}
+
 function expressaoBusca() {
     return filter_var($_GET['q'], FILTER_SANITIZE_STRING);
 }
 
-function buscar($expressao, $conn) {
-    $stm = $conn->prepare("SELECT * FROM postagens WHERE titulo LIKE :search OR post LIKE :search");
+function buscar($expressao, $pagina, $resultadosPorPagina, $conn) {
+    if ($pagina > 0) {
+        $pagina--;
+    }
+
+    $inicio = $pagina * $resultadosPorPagina;
+
+    $stm = $conn->prepare("SELECT *
+                             FROM postagens
+                            WHERE titulo LIKE :search
+                               OR post LIKE :search
+                         ORDER BY id
+                            LIMIT {$inicio}, {$resultadosPorPagina}");
 
     $stm->bindValue(':search', "%{$expressao}%");
     $stm->execute();
@@ -14,7 +29,10 @@ function buscar($expressao, $conn) {
 }
 
 function totalResultados($expressao, $conn) {
-    $stm = $conn->prepare("SELECT COUNT(*) FROM postagens WHERE titulo LIKE :search OR post LIKE :search");
+    $stm = $conn->prepare("SELECT COUNT(*)
+                             FROM postagens
+                            WHERE titulo LIKE :search
+                               OR post LIKE :search");
 
     $stm->bindValue(':search', "%{$expressao}%");
     $stm->execute();

@@ -1,12 +1,15 @@
 <?php
 
-$config = require 'config/db.php';
+$config = require 'config/app.php';
+$db = require 'config/db.php';
+
 require_once 'lib/db.php';
 require_once 'lib/busca.php';
 
-$conn = connect($config['type'], $config['host'], $config['port'], $config['name'], $config['user'], $config['pass']);
+$conn = connect($db['type'], $db['host'], $db['port'], $db['name'], $db['user'], $db['pass']);
 
 $expressao = expressaoBusca();
+$pagina = paginaAtual();
 $total = totalResultados($expressao, $conn);
 
 if ($total == 0) {
@@ -16,13 +19,29 @@ if ($total == 0) {
 
 echo "<p>{$total} resultado(s) para sua pesquisa. </p>";
 
-$resultado = buscar($expressao, $conn);
+$resultado = buscar($expressao, $pagina, $config['resultadosPorPagina'], $conn);
 
+$postUrl = $config['url'] . '?post=%1\$s';
 $template = <<<HTML
     <div>
         <h4>%2\$s</h4>
         <p>%3\$s</p>
-        <a href="http://meublog.com.br/?post=%1\$s"> Link para Postagem </a>
+        <a href="{$postUrl}"> Link para Postagem </a>
     </div>
 HTML;
 exibeResultados($resultado, $template);
+
+echo '<p>Paginas: ';
+
+if ($pagina > 1) {
+    $paginaAnterior = $pagina - 1;
+    echo "<a href=\"{$config['url']}?q={$expressao}&p={$paginaAnterior}\">Anterior</a> ";
+}
+
+$totalPaginas = ceil($total / $config['resultadosPorPagina']);
+if ($totalPaginas > $pagina) {
+    $proximaPagina = $pagina + 1;
+    echo " <a href=\"{$config['url']}?q={$expressao}&p={$proximaPagina}\">Proxima</a>";
+}
+
+echo ' </p>';
