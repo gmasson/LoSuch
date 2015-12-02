@@ -1,67 +1,56 @@
 <?php
 
-  include 'from/db_php/connect.php';
-  
-  // Busca via GET
-  $busca = $_GET['q'];
+$config = require 'config/app.php';
+$db = require 'config/db.php';
 
-  // Resultados por página
-  $max_resultados_pagina = "10";
+require_once 'lib/db.php';
+require_once 'lib/busca.php';
 
-  // SELECT para Busca
-  $select = $connect_mysql->prepare("SELECT * FROM postagens WHERE titulo LIKE :search or post LIKE :search");
-  $select->bindParam( ":search", "%$busca%" );
-  $select->execute();
-  
+$conn = connect($db['type'], $db['host'], $db['port'], $db['name'], $db['user'], $db['pass']);
 
-  // ...
+$expressao = expressaoBusca();
+$pagina = paginaAtual();
+$total = totalResultados($expressao, $conn);
 
 
-  // Calcula quantos resultados retornou a busca
-  $contagem_resultados = mysql_num_rows($select); 
+# Quantidade de Resultados --------------------
 
-  // Adiciona o plural na palavra Resultado(s)
-  if ($contagem_resultados <= 1) { 
-    $contagem_resultados_palavra = "resultado"; 
-  } else { 
-    $contagem_resultados_palavra = "resultados"; 
-  }
-
-  // Quantidade de Resultados
-  echo "<p> <?php echo $contagem_resultados." ".$contagem_resultados_palavra;?> para sua pesquisa. </p>";
-
-
-  if ($contagem_resultados == 0) {
-   
+if ($total == 0) {
     echo "<p>Ops, nada Encontrado! Tente sua busca novamente com outras palavras!</p>";
-  
-  } else {
+    exit;
+}
 
-    while ($resultado_busca = mysql_fetch_assoc($select)) { 
-
-      // Dados para exibição
-      $resultado_id = $resultado_busca['id'];
-      $resultado_titulo = $resultado_busca['titulo'];
-      $resultado_post = $resultado_busca['post'];
-
-      // Se a quantidade de caracteres for maior que 42, reduza e insira '...' no final
-      if (strlen($resultado_post) >= 42) { $resultado_post = substr($resultado_post, 0, 51)."..."; }
-
-      // Exibição dos resultados da pesquisa
-      echo "<!-- RESULTADO -->
-        <div>
-          <h4>{$resultado_titulo}</h4>
-          <p>{$resultado_titulo}</p>
-          <a href='http://meublog.com.br/?post={$resultado_id}'> Link para Postagem </a>
-        </div>";
-
-    } /* Fim while */
-
-  } /* Fim if-else */
+echo "<p>{$total} resultado(s) para sua pesquisa. </p>";
 
 
-  // Paginação
+# Busca --------------------
 
-  // ...
+$resultado = buscar($expressao, $pagina, $config['resultadosPorPagina'], $conn);
 
-?>
+$postUrl = $config['url'] . '?post=%1\$s';
+$template = <<<HTML
+    <div>
+        <h4>%2\$s</h4>
+        <p>%3\$s</p>
+        <a href="{$postUrl}"> Link para Postagem </a>
+    </div>
+HTML;
+exibeResultados($resultado, $template);
+
+
+# Paginação --------------------
+
+echo '<p>';
+
+if ($pagina > 1) {
+    $paginaAnterior = $pagina - 1;
+    echo "<a href=\"{$config['url']}?q={$expressao}&p={$paginaAnterior}\">Anterior</a> ";
+}
+
+$totalPaginas = ceil($total / $config['resultadosPorPagina']);
+if ($totalPaginas > $pagina) {
+    $proximaPagina = $pagina + 1;
+    echo " <a href=\"{$config['url']}?q={$expressao}&p={$proximaPagina}\">Proxima</a>";
+}
+
+echo '</p>';
