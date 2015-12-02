@@ -12,13 +12,17 @@ $expressao = expressaoBusca();
 $pagina = paginaAtual();
 $total = totalResultados($expressao, $conn);
 
+<<<<<<< HEAD
 
 # Quantidade de Resultados --------------------
 
+=======
+>>>>>>> e3e800952e766a3bbaf35da52f2155800b49a060
 if ($total == 0) {
     echo "<p>Ops, nada Encontrado! Tente sua busca novamente com outras palavras!</p>";
     exit;
 }
+<<<<<<< HEAD
 
 echo "<p>{$total} resultado(s) para sua pesquisa. </p>";
 
@@ -41,6 +45,24 @@ exibeResultados($resultado, $template);
 # Paginação --------------------
 
 echo '<p>';
+=======
+
+echo "<p>{$total} resultado(s) para sua pesquisa. </p>";
+
+$resultado = buscar($expressao, $pagina, $config['resultadosPorPagina'], $conn);
+
+$postUrl = $config['url'] . '?post=%1\$s';
+$template = <<<HTML
+    <div>
+        <h4>%2\$s</h4>
+        <p>%3\$s</p>
+        <a href="{$postUrl}"> Link para Postagem </a>
+    </div>
+HTML;
+exibeResultados($resultado, $template);
+
+echo '<p>Paginas: ';
+>>>>>>> e3e800952e766a3bbaf35da52f2155800b49a060
 
 if ($pagina > 1) {
     $paginaAnterior = $pagina - 1;
@@ -53,4 +75,8 @@ if ($totalPaginas > $pagina) {
     echo " <a href=\"{$config['url']}?q={$expressao}&p={$proximaPagina}\">Proxima</a>";
 }
 
+<<<<<<< HEAD
 echo '</p>';
+=======
+echo ' </p>';
+>>>>>>> e3e800952e766a3bbaf35da52f2155800b49a060

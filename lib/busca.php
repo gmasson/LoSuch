@@ -1,7 +1,11 @@
 <?php
 
 function paginaAtual() {
+<<<<<<< HEAD
     return (int) $_GET['pag'] ?: 1;
+=======
+    return (int) $_GET['p'] ?: 1;
+>>>>>>> e3e800952e766a3bbaf35da52f2155800b49a060
 }
 
 function expressaoBusca() {
