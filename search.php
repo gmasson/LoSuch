@@ -9,11 +9,14 @@ $results_for_page = 8;
 
 # Busca
 $search_user = '';
-if (isset($_GET['search'])) { $search_user =  $_GET['search']); }
+if (isset($_GET['q'])) { $search_user =  $_GET['q']; }
 
 # Página atual da busca
-$current_page = (int) $_GET['pg'];
-
+if (!$_GET['pg']) {
+  $current_page = 1;
+} else {
+  $current_page = (int) $_GET['pg'];
+}
 
 // ============================================
 // Conexão MySQL
@@ -54,7 +57,8 @@ if (!$search_user) {
   // ============================================
 
   # Calculo para exibição dos resultados conforme a página atual
-  $number_result_page = $current_page * $results_for_page;
+  $current_page_calc = $current_page - 1;
+  $number_result_page = $current_page_calc * $results_for_page;
 
   # Busca no Banco de Dados
   $select_db = $connect->prepare("SELECT * FROM records WHERE title LIKE :search OR description LIKE :search OR url LIKE :search ORDER BY id LIMIT {$number_result_page}, {$results_for_page}");
@@ -65,25 +69,31 @@ if (!$search_user) {
   while ($result = $select_db->fetch(PDO::FETCH_ASSOC)) {
       $description = substr($result['description'], 0, 42) . "...";
       echo "<article>
-        <a href=\"{$result['url']}\">{$result['title']}</a>
-        <p><small>{$result['date']} - </small> {$description}</p>
+        <a href=\"{$result['url']}\" target=\"_blank\">{$result['title']}</a>
+        <div><a href=\"{$result['url']}\" target=\"_blank\">{$result['url']}</a></div>
+        <p><span>{$result['date']} - </span> {$description}</p>
       </article>";
   }
 
+
   // Paginação
   // ============================================
+
+  $all_pages = $count_results / $results_for_page;
 
   if ($current_page > 1) {
     $back_page = $current_page - 1;
     echo "<a href=\"?q={$search_user}&pg={$back_page}\"> << Anterior </a>";
   }
+  if ($count_results > 0) {
+    echo "<a href=\"?q={$search_user}&pg={$current_page}\"> {$current_page} </a>";
+  }
 
-  echo "<a href=\"?q={$search_user}&pg={$current_page}\"> {$current_page} </a>";
-
-  $all_pages = $count_results / $results_for_page;
-  if ($current_page < $all_pages) {
-    $next_page = $current_page + 1;
-    echo "<a href=\"?q={$search_user}&pg={$next_page}\"> Próxima >> </a>";
+  if ($all_pages > 1) {
+    if ($current_page < $all_pages) {
+      $next_page = $current_page + 1;
+      echo "<a href=\"?q={$search_user}&pg={$next_page}\"> Próxima >> </a>";
+    }
   }
 
 }
